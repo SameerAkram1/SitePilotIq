@@ -1,0 +1,299 @@
+{
+  "auth": {
+    "email": {
+      "verifySubject": "Verify your SitePilotIQ account",
+      "verifyBody": "Hi {name},\n\nWelcome to SitePilotIQ! Please verify your email address to get started.\n\nVerify: {link}\n\nThis link expires in 24 hours.",
+      "inviteSubject": "{inviter} invited you to join {company} on SitePilotIQ",
+      "inviteBody": "{inviter} invited you to join {company} as {role}.\n\nAccept: {link}\n\nThis link expires in 48 hours.",
+      "welcomeSubject": "Welcome to SitePilotIQ!",
+      "welcomeBody": "Welcome to SitePilotIQ, {name}! Your company {company} is all set.",
+      "resetSubject": "Reset your SitePilotIQ password",
+      "resetBody": "Hi {name},\n\nReset your password: {link}\n\nThis link expires in 1 hour."
+    },
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailTaken": "This email is already registered",
+      "userNotFound": "User not found",
+      "invalidToken": "Invalid or expired token",
+      "accountLocked": "Account is temporarily locked. Please try again later.",
+      "emailNotVerified": "Please verify your email before logging in",
+      "passwordRequirements": "Password does not meet security requirements",
+      "invalidVerificationToken": "Invalid verification token",
+      "tenantRequired": "User has no associated tenant",
+      "verificationExpired": "Verification link has expired",
+      "invalidCompanyName": "Invalid company name",
+      "companyNameTaken": "This company name is already taken. Please choose a different name.",
+      "invalidRefreshToken": "Invalid refresh token",
+      "tokenReuseDetected": "Token reuse detected. All sessions revoked. Please log in again.",
+      "refreshTokenExpired": "Refresh token expired",
+      "accountNotActive": "User account is not active",
+      "invalidResetToken": "Invalid reset token",
+      "resetLinkExpired": "Reset link has expired"
+    }
+  },
+  "guards": {
+    "errors": {
+      "invalidToken": "Invalid or expired token",
+      "accessDenied": "Access denied",
+      "noPermission": "You do not have permission to access this resource",
+      "noTenant": "No tenant associated with this account"
+    }
+  },
+  "users": {
+    "errors": {
+      "notFound": "User not found",
+      "cannotUpdateOther": "You can only update your own profile",
+      "cannotChangeOwnRole": "You cannot change your own role",
+      "cannotDisableSelf": "You cannot disable your own account",
+      "tenantNotFound": "Tenant not found",
+      "maxUsersReached": "You've reached the maximum {max} users for your plan",
+      "emailExists": "User with this email already exists in your company",
+      "invitationAlreadySent": "An invitation has already been sent to this email",
+      "invitationNotFound": "Invitation not found",
+      "invalidInvitation": "Invalid invitation",
+      "invitationRevoked": "Invitation has been revoked",
+      "invitationAccepted": "Invitation has already been accepted",
+      "invitationExpired": "Invitation has expired",
+      "companyNotActive": "Company account is not active",
+      "currentPasswordIncorrect": "Current password is incorrect",
+      "newPasswordSame": "New password must be different",
+      "cannotDeleteSelf": "You cannot delete your own account",
+      "hourlyRateRequired": "Hourly rate is required when salary basis is Hourly",
+      "dailyRateRequired": "Daily rate is required when salary basis is Daily",
+      "monthlySalaryRequired": "Monthly base salary is required when salary basis is Monthly",
+      "onlyHrCanTerminate": "Only admins and HR managers can terminate users"
+    }
+  },
+  "sites": {
+    "errors": {
+      "notFound": "Site not found",
+      "projectNotFound": "Project not found",
+      "cannotCreateUnderStatus": "Cannot create site under a {status} project",
+      "siteManagerInvalid": "Site manager not found or does not have an appropriate role",
+      "onlyAdminOrManagerCanEdit": "Only admins or the assigned site manager can edit this site",
+      "onlyAdminCanReassign": "Only admins can reassign a site to a different project",
+      "confirmReassignment": "Please confirm project reassignment by setting confirmProjectReassignment to true",
+      "targetProjectNotFound": "Target project not found",
+      "onlyAdminOrManagerCanDisable": "Only admins or the assigned site manager can disable this site",
+      "parentLocationNotFound": "Parent location not found",
+      "cannotSelfParent": "Cannot set parent to a descendant of itself",
+      "locationNotFound": "Location not found",
+      "cannotDeleteWithChildren": "Cannot delete location \"{name}\" — it has {count} child location(s). Delete or move them first.",
+      "gpsNotConfigured": "This site does not have GPS coordinates configured. Please contact your administrator.",
+      "noFileUploaded": "No file uploaded",
+      "disabledSuccess": "Site disabled successfully",
+      "hasActiveWorkers": "Cannot disable site with active worker assignments. End or reassign workers first.",
+      "hasPendingIpcs": "Cannot disable site with pending or submitted IPC records. Certify or reject them first."
+    }
+  },
+  "projects": {
+    "errors": {
+      "notFound": "Project not found",
+      "managerInvalid": "Project manager not found or does not have an appropriate role",
+      "categoryNotFound": "Category not found",
+      "clientNotFound": "This partner is not found or is not flagged as a client",
+      "onlyAdminOrManagerCanEdit": "Only admins or the assigned project manager can edit this project",
+      "activeSitesExist": "Cannot mark project as {status}. The following sites are still active: {sites}. Disable or complete them first.",
+      "cannotDisableWithSites": "Cannot disable project \"{name}\" — it has {count} active site(s). Disable or complete them first.",
+      "uncertifiedIpcsExist": "Cannot complete project with {count} uncertified IPC(s). Certify or reject them first.",
+      "unpaidIpcsExist": "Cannot complete project with {count} unpaid IPC(s). Record payments or mark as paid first.",
+      "invalidFileType": "Invalid file type. Allowed: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG",
+      "fileTooLarge": "File size must be less than 20MB",
+      "attachmentNotFound": "Attachment not found",
+      "onlyAdminOrUploaderCanDelete": "Only admins or the original uploader can delete this attachment"
+    }
+  },
+  "partners": {
+    "errors": {
+      "notFound": "Partner not found",
+      "mustBeAtLeastOne": "Partner must be at least one of: Client, Supplier, Subcontractor",
+      "vatExists": "A partner with this VAT number already exists",
+      "customPaymentDaysRequired": "Custom payment days is required when payment term is CUSTOM",
+      "blacklistNoteRequired": "A note explaining the blacklist reason is required when setting status to BLACKLISTED",
+      "onlyAdminCanDisable": "Only admins can disable partners",
+      "cannotDisableWithProjects": "Cannot disable partner \"{name}\". They are referenced as client on the following active projects: {projects}. Reassign or close those projects first.",
+      "onlyAdminCanDelete": "Only admins can delete partners",
+      "cannotDeleteWithHistory": "Cannot delete partner \"{name}\". They have {count} project(s) referencing them. Partners with transaction history can only be deactivated, not deleted. Use the disable endpoint instead."
+    }
+  },
+  "assignments": {
+    "errors": {
+      "alreadyAssigned": "Worker is already assigned to this site on this date",
+      "notFound": "Assignment not found",
+      "siteNotFound": "Site not found or not active",
+      "userNotFound": "User not found or not active",
+      "projectNotActive": "Cannot assign workers to a site under a non-active project",
+      "endDateBeforeStart": "End date must be after start date",
+      "userIdRequired": "userId or userIds is required",
+      "overlapConflict": "Worker is already assigned to {siteName} from {range}"
+    },
+    "notifications": {
+      "assignedTitle": "Assigned to {siteName}",
+      "assignedMessage": "You have been assigned to site {siteName} from {startDate}",
+      "endedTitle": "Assignment Ended",
+      "endedMessage": "Your assignment at {siteName} has been ended",
+      "cancelledTitle": "Assignment Cancelled",
+      "cancelledMessage": "Your assignment at {siteName} has been cancelled",
+      "reassignedTitle": "Assignment Reassigned",
+      "reassignedMessage": "You have been reassigned to {siteName}",
+      "updatedTitle": "Assignment Updated",
+      "updatedMessage": "Your assignment at {siteName} has been updated"
+    }
+  },
+  "attendance": {
+    "errors": {
+      "noEmployeeRecord": "No employee record found for your account. Only active users can check in.",
+      "invalidRole": "Only workers and site managers can check in via QR scan.",
+      "employeeNotActive": "Your account is not active.",
+      "siteNotFound": "Site not found.",
+      "siteNotActive": "This site is not currently active.",
+      "gpsNotConfigured": "This site does not have GPS coordinates configured. Please contact your administrator.",
+      "alreadyCheckedIn": "You have already checked in at this site today.",
+      "checkInDenied": "Check-in denied: You are {distance}m away from the site. Maximum allowed distance is {radius}m.",
+      "noActiveCheckIn": "No active check-in found for today.",
+      "checkOutGpsNotConfigured": "Site GPS coordinates not configured. Cannot validate check-out location.",
+      "checkOutFlagged": "Check-out flagged: You are {distance}m away from the site. Maximum allowed distance is {radius}m.",
+      "invalidQr": "Invalid or expired QR code. Please scan a valid QR code.",
+      "siteIdOrQrRequired": "Either siteId or qrPayload is required.",
+      "notAssignedToSite": "You are not assigned to this site. Please contact your manager to get assigned before checking in."
+    }
+  },
+  "upload": {
+    "errors": {
+      "invalidFileType": "Invalid file type. Allowed: {types}",
+      "fileTooLarge": "File too large. Maximum size: {maxMB}MB",
+      "uploadFailed": "Failed to upload file",
+      "signedUrlFailed": "Failed to generate signed URL",
+      "invalidBucket": "Invalid bucket",
+      "invalidPath": "Invalid path",
+      "pathAccessDenied": "Access denied: path does not belong to this tenant"
+    }
+  },
+  "companySettings": {
+    "errors": {
+      "notFound": "Company settings not found",
+      "storageNotConfigured": "File upload not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+      "invalidImageType": "Only JPG, PNG, and WebP images are allowed",
+      "imageTooLarge": "File size must be less than 2MB"
+    }
+  },
+  "tenants": {
+    "errors": {
+      "slugExists": "Tenant with this slug already exists",
+      "notFound": "Tenant not found"
+    }
+  },
+  "projectCategories": {
+    "errors": {
+      "nameExists": "Category with this name already exists",
+      "notFound": "Category not found",
+      "cannotDeleteWithProjects": "Cannot delete category \"{name}\" — it is used by {count} project(s). Reassign or remove those projects first."
+    }
+  },
+  "common": {
+    "errors": {
+      "unauthorized": "You are not authorized to perform this action",
+      "notFound": "Resource not found",
+      "internalError": "An internal server error occurred",
+      "tenantRequired": "Tenant context is required"
+    },
+    "unassigned": "Unassigned"
+  },
+  "onboarding": {
+    "title": "Complete Your Profile",
+    "subtitle": "Tell us a bit about yourself to get started",
+    "fullName": "Full Name",
+    "phone": "Phone Number",
+    "dateOfBirth": "Date of Birth",
+    "gender": "Gender",
+    "fatherName": "Father's Name",
+    "submit": "Complete Setup",
+    "success": "Profile completed successfully!"
+  },
+  "departments": {
+    "errors": {
+      "nameExists": "A department with this name already exists",
+      "notFound": "Department not found",
+      "cannotDeleteWithUsers": "Cannot delete department \"{name}\" because {count} user(s) are assigned to it"
+    }
+  },
+  "boq": {
+    "errors": {
+      "fileEmpty": "File is empty or has no data rows",
+      "missingColumns": "Missing required columns: {columns}",
+      "itemCodeRequired": "Item_Code is required",
+      "duplicateItemCode": "Duplicate Item_Code \"{code}\" — each code must be unique",
+      "descriptionRequired": "Description is required",
+      "invalidUnit": "Unit must be one of: {units}",
+      "qtyRequired": "Estimated_Qty must be a positive number",
+      "rateRequired": "Unit_Rate must be a positive number",
+      "validationFailed": "Validation failed for {count} row(s)",
+      "itemCodeExists": "Item codes already exist in the database",
+      "itemCodeAlreadyExists": "Item code \"{code}\" already exists on this site",
+      "itemNotFound": "BoQ item not found",
+      "cannotEditBaselined": "Cannot edit baselined items. Create a Variation Order instead.",
+      "cannotDeleteBaselined": "Cannot delete baselined items",
+      "noItemsToBaseline": "No BoQ items to baseline",
+      "alreadyBaselined": "BoQ is already baselined",
+      "baselinedWarning": "BoQ is already baselined. Use Variation Orders for changes."
+    }
+  },
+  "measurements": {
+    "errors": {
+      "startDateRequired": "startDate and endDate are required",
+      "boqItemNotFound": "BoQ item not found",
+      "dim1Required": "Dimension 1 (Length) is required for unit {unit}",
+      "dim2Required": "Dimension 2 (Width) is required for unit {unit}",
+      "dim3Required": "Dimension 3 (Height) is required for unit {unit}",
+      "quantityRequired": "Total quantity must be greater than zero",
+      "entryNotFound": "Measurement entry not found"
+    }
+  },
+  "ipc": {
+    "errors": {
+      "recordNotFound": "IPC record not found",
+      "draftNotFound": "Draft IPC record not found",
+      "submittedNotFound": "Submitted IPC record not found",
+      "certifiedNotFound": "Certified IPC record not found",
+      "billingEndAfterStart": "Billing end date must be after start date",
+      "pendingIpcExists": "Cannot create new IPC while IPC-{number} is in {status} status",
+      "noBaselinedItems": "No baselined BoQ items found. Baseline the BoQ first.",
+      "boqItemNotFound": "BoQ item {id} not found",
+      "cumulativeExceedsBoq": "Cumulative quantity ({cumQty}) exceeds BoQ quantity ({boqQty}) for item {itemCode}",
+      "paymentExceedsBalance": "Payment amount exceeds remaining balance",
+      "invalidPaymentStatus": "Payments can only be recorded against certified or paid IPCs"
+    }
+  },
+  "boq_sections": {
+    "errors": {
+      "notFound": "BoQ section not found",
+      "codeExists": "Section code already exists"
+    }
+  },
+  "variation_orders": {
+    "errors": {
+      "notFound": "Variation order not found",
+      "draftNotFound": "Draft variation order not found",
+      "submittedNotFound": "Submitted variation order not found",
+      "noItems": "At least one item is required",
+      "duplicateAddCodes": "Duplicate item codes in ADD items",
+      "modifyRequiresBoqItemId": "MODIFY item requires boqItemId",
+      "boqItemNotBaselined": "BoQ item not found or not baselined",
+      "itemCodeConflict": "Item codes already exist"
+    }
+  },
+  "clients": {
+    "errors": {
+      "notFound": "Client not found",
+      "vatExists": "A client with this VAT number already exists",
+      "customPaymentDaysRequired": "Custom payment days are required",
+      "hasActiveProjects": "Cannot disable client with active projects",
+      "hasProjects": "Cannot delete client with existing projects",
+      "contactNotFound": "Contact not found",
+      "budgetNotFound": "Budget not found",
+      "expenseNotFound": "Expense not found",
+      "noteNotFound": "Note not found",
+      "invalidExpenseStatusTransition": "Cannot change expense status from {from} to {to}. Allowed transitions: {allowed}"
+    }
+  }
+}

@@ -1,0 +1,1202 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  PENDING
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  PROJECT_MANAGER
+  SITE_MANAGER
+  ENGINEER
+  FINANCE_MANAGER
+  HR_MANAGER
+  PURCHASE_MANAGER
+  ORDER_MANAGER
+  CONTRACT_MANAGER
+  FOREMAN
+  OFFICE_STAFF
+  DRIVER
+  WORKER
+}
+
+enum PartnerCategory {
+  INDIVIDUAL
+  COMPANY
+  GOVERNMENT
+  INTERNATIONAL
+}
+
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+  BLACKLISTED
+  PROSPECT
+  SUSPENDED
+}
+
+enum PaymentTerm {
+  CASH
+  DAYS_7
+  DAYS_15
+  DAYS_30
+  CUSTOM
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  PROSPECT
+  BLACKLISTED
+  SUSPENDED
+}
+
+enum NoteType {
+  GENERAL
+  CALL
+  MEETING
+  EMAIL
+  TASK
+  FOLLOW_UP
+}
+
+enum NoteStatus {
+  DRAFT
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  SKIPPED
+}
+
+enum NotePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum BudgetStatus {
+  ACTIVE
+  EXHAUSTED
+  EXPIRED
+  CANCELLED
+}
+
+enum ExpenseType {
+  INVOICE
+  PAYMENT_RECEIVED
+  CREDIT_NOTE
+  DIRECT_EXPENSE
+}
+
+enum ExpenseStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  DAILY_WAGE
+}
+
+enum SalaryBasis {
+  HOURLY
+  DAILY
+  MONTHLY
+}
+
+enum PlanType {
+  FREE_TRIAL
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  TRIAL_EXPIRED
+  CANCELLED
+}
+
+model Tenant {
+  id               String             @id @default(uuid())
+  name             String
+  slug             String             @unique
+  status           TenantStatus       @default(ACTIVE)
+  plan             PlanType           @default(FREE_TRIAL)
+  trialEndsAt      DateTime?
+  maxUsers         Int                @default(5)
+  isActive         Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  users            User[]
+  companySettings  CompanySettings?
+  invitations      UserInvitation[]
+  subscriptions    Subscription[]
+  projects         Project[]
+  sites            Site[]
+  projectCategories ProjectCategory[]
+  siteLocations    SiteLocation[]
+  partners         Partner[]
+  clients          Client[]
+  workerAssignments WorkerAssignment[]
+  attendance        Attendance[]
+  departments       Department[]
+  variationOrders   VariationOrder[]
+  boqSections       BoqSection[]
+  boqItems          BoQItem[]
+  mbEntries         MeasurementBookEntry[]
+  ipcRecords        IpcRecord[]
+  ipcLineItems      IpcLineItem[]
+  ipcPaymentRecords IpcPaymentRecord[]
+  variationOrderItems VariationOrderItem[]
+  siteAttachments SiteAttachment[]
+  dailyReports DailyProgressReport[]
+  sitePhotos    SitePhoto[]
+  notifications Notification[]
+  projectMilestones ProjectMilestone[]
+}
+
+model Partner {
+  id                  String          @id @default(uuid())
+  tenantId            String
+  tenant              Tenant          @relation(fields: [tenantId], references: [id])
+  code                String
+
+  name                String
+  legalName           String?
+  vatNumber           String?
+  registrationNumber  String?
+  dunsNumber          String?
+  leiCode             String?
+  category            PartnerCategory @default(COMPANY)
+  industry            String?
+  status              PartnerStatus   @default(ACTIVE)
+
+  isClient            Boolean         @default(false)
+  isSupplier          Boolean         @default(false)
+  isSubcontractor     Boolean         @default(false)
+
+  contactPerson       String?
+  phone               String?
+  email               String?
+  website             String?
+
+  street              String?
+  city                String?
+  state               String?
+  postalCode          String?
+  country             String?
+
+  openingBalance      Decimal         @default(0) @db.Decimal(15, 2)
+  creditLimit         Decimal?        @db.Decimal(15, 2)
+  paymentTerm         PaymentTerm     @default(DAYS_30)
+  customPaymentDays   Int?
+  defaultDiscountPct  Float           @default(0)
+  taxCategory         String?
+  bankName            String?
+  bankAccountIban     String?
+  swiftBic            String?
+  riskLevel           RiskLevel       @default(LOW)
+
+  notes               String?         @db.Text
+  isDeleted           Boolean         @default(false)
+  createdById         String
+  createdBy           User            @relation("PartnerCreatedBy", fields: [createdById], references: [id])
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  partnerNotes        PartnerNote[]
+
+  @@unique([tenantId, code])
+  @@unique([tenantId, vatNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, isClient])
+  @@index([tenantId, isSupplier])
+}
+
+model PartnerNote {
+  id          String    @id @default(uuid())
+  tenantId    String
+  partnerId   String
+  partner     Partner   @relation(fields: [partnerId], references: [id])
+  noteText    String    @db.Text
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([tenantId])
+  @@index([partnerId])
+}
+
+model Client {
+  id                  String          @id @default(uuid())
+  tenantId            String
+  tenant              Tenant          @relation(fields: [tenantId], references: [id])
+  code                String
+
+  name                String
+  legalName           String?
+  email               String?
+  phone               String?
+  website             String?
+  logo                String?
+
+  street              String?
+  city                String?
+  state               String?
+  postalCode          String?
+  country             String?
+
+  industry            String?
+  vatNumber           String?
+  registrationNumber  String?
+  category            PartnerCategory @default(COMPANY)
+
+  currencyCode        String          @default("USD")
+  creditLimit         Decimal?        @db.Decimal(15, 2)
+  paymentTerm         PaymentTerm     @default(DAYS_30)
+  customPaymentDays   Int?
+  openingBalance      Decimal         @default(0) @db.Decimal(15, 2)
+
+  status              ClientStatus    @default(ACTIVE)
+  riskLevel           RiskLevel       @default(LOW)
+  notes               String?         @db.Text
+  isDeleted           Boolean         @default(false)
+
+  createdById         String
+  createdBy           User            @relation("CreatedClients", fields: [createdById], references: [id])
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  projects            Project[]
+  contacts            ClientContact[]
+  clientNotes         ClientNote[]
+  budgets             ClientBudget[]
+  documents           ClientDocument[]
+  expenses            ClientExpense[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+model ClientContact {
+  id          String   @id @default(uuid())
+  tenantId    String
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  name        String
+  role        String?
+  email       String?
+  phone       String?
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, clientId])
+}
+
+model ClientNote {
+  id           String       @id @default(uuid())
+  tenantId     String
+  clientId     String
+  client       Client       @relation(fields: [clientId], references: [id])
+  content      String       @db.Text
+  type         NoteType     @default(GENERAL)
+  title        String?
+  status       NoteStatus   @default(DRAFT)
+  priority     NotePriority @default(MEDIUM)
+  noteDate     DateTime?
+  endDate      DateTime?
+  isReminder   Boolean      @default(false)
+  reminderDate DateTime?
+  authorId     String
+  author       User         @relation("ClientNoteAuthor", fields: [authorId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now())
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, isReminder, reminderDate])
+}
+
+model ClientBudget {
+  id              String        @id @default(uuid())
+  tenantId        String
+  clientId        String
+  client          Client        @relation(fields: [clientId], references: [id])
+  name            String
+  description     String?       @db.Text
+  totalAmount     Decimal       @db.Decimal(15, 2)
+  spentAmount     Decimal       @default(0) @db.Decimal(15, 2)
+  currencyCode    String        @default("USD")
+  startDate       DateTime?
+  endDate         DateTime?
+  status          BudgetStatus  @default(ACTIVE)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([tenantId, clientId])
+}
+
+model ClientDocument {
+  id          String   @id @default(uuid())
+  tenantId    String
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  mimeType    String
+  description String?
+  uploadedById String
+  uploadedBy  User     @relation("UploadedClientDocuments", fields: [uploadedById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, clientId])
+}
+
+model ClientExpense {
+  id              String        @id @default(uuid())
+  tenantId        String
+  clientId        String
+  client          Client        @relation(fields: [clientId], references: [id])
+  projectId       String?
+  project         Project?      @relation(fields: [projectId], references: [id])
+  type            ExpenseType
+  referenceNumber String?
+  description     String
+  amount          Decimal       @db.Decimal(15, 2)
+  taxAmount       Decimal       @default(0) @db.Decimal(15, 2)
+  totalAmount     Decimal       @db.Decimal(15, 2)
+  date            DateTime      @default(now())
+  dueDate         DateTime?
+  status          ExpenseStatus @default(PENDING)
+  paymentMethod   String?
+  notes           String?       @db.Text
+  attachmentUrl   String?
+  createdById     String
+  createdBy       User          @relation("CreatedClientExpenses", fields: [createdById], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([tenantId, clientId])
+  @@index([tenantId, clientId, type])
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  plan      PlanType
+  startDate DateTime
+  endDate   DateTime?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+}
+
+model User {
+  id                 String           @id @default(uuid())
+  tenantId           String?
+  tenant             Tenant?          @relation(fields: [tenantId], references: [id])
+  fullName           String
+  email              String
+  passwordHash       String
+  phone              String?
+  role               UserRole         @default(WORKER)
+  status             UserStatus       @default(PENDING)
+  failedLoginCount   Int              @default(0)
+  lockedUntil        DateTime?
+  profilePhoto       String?
+  jobTitle           String?
+  departmentId       String?
+  department         Department?      @relation(fields: [departmentId], references: [id])
+  emailVerified      Boolean          @default(false)
+  emailVerifyToken   String?
+  emailVerifyExpiry  DateTime?
+  passwordResetToken String?
+  passwordResetExpiry DateTime?
+  isFirstLogin       Boolean          @default(true)
+  invitedById        String?
+  preferredLanguage  String           @default("en")
+  lastActiveAt       DateTime?
+  lastLoginAt        DateTime?
+  permissions        Json?
+
+  code               String?          @unique
+  fatherName         String?
+  surname            String?
+  ssn                String?
+  passportNumber     String?
+  dateOfBirth        DateTime?
+  gender             String?
+  joiningDate        DateTime?
+  terminationDate    DateTime?
+  employmentType     EmploymentType?  @default(FULL_TIME)
+  salaryBasis        SalaryBasis?     @default(MONTHLY)
+  hourlyRate         Decimal?         @db.Decimal(10, 2)
+  dailyRate          Decimal?         @db.Decimal(10, 2)
+  monthlyBaseSalary  Decimal?         @db.Decimal(10, 2)
+  street             String?
+  city               String?
+  country            String?
+  bankName           String?
+  bankAccountNumber  String?
+  iban               String?
+  swiftBic           String?
+  notes              String?          @db.Text
+  onboardingComplete Boolean          @default(false)
+
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  auditLogs          AuditLog[]
+  managedProjects    Project[]        @relation("ProjectManager")
+  createdProjects    Project[]        @relation("ProjectCreatedBy")
+  managedSites       Site[]           @relation("SiteManager")
+  createdSites       Site[]           @relation("SiteCreatedBy")
+  uploadedProjectAttachments ProjectAttachment[] @relation("UploadedProjectAttachments")
+  uploadedSiteAttachments SiteAttachment[] @relation("UploadedSiteAttachments")
+  createdPartners   Partner[] @relation("PartnerCreatedBy")
+  createdClients    Client[] @relation("CreatedClients")
+  clientNotes       ClientNote[] @relation("ClientNoteAuthor")
+  uploadedClientDocuments ClientDocument[] @relation("UploadedClientDocuments")
+  createdClientExpenses ClientExpense[] @relation("CreatedClientExpenses")
+  assignedWorker    WorkerAssignment[] @relation("AssignmentEmployee")
+  createdAssignments WorkerAssignment[] @relation("AssignmentCreatedBy")
+  endedAssignments  WorkerAssignment[] @relation("AssignmentEndedBy")
+  attendanceRecords  Attendance[] @relation("AttendanceEmployee")
+  partnerNotes      PartnerNote[]
+  createdBoqItems   BoQItem[]
+  mbEntries         MeasurementBookEntry[]
+  createdIpcRecords IpcRecord[]
+  certifiedIpcRecords IpcRecord[] @relation("IpcCertifiedBy")
+  rejectedIpcRecords IpcRecord[] @relation("IpcRejectedBy")
+  ipcPaymentRecords  IpcPaymentRecord[]
+  variationOrders   VariationOrder[]
+  createdDPRs       DailyProgressReport[] @relation("CreatedDPR")
+  uploadedSitePhotos SitePhoto[] @relation("UploadedSitePhotos")
+  approvedVoOrders  VariationOrder[] @relation("VoApprovedBy")
+  createdMilestones ProjectMilestone[] @relation("CreatedMilestone")
+  notifications     Notification[]
+
+  @@unique([tenantId, email])
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([email])
+  @@index([emailVerifyToken])
+  @@index([passwordResetToken])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  tenantId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  module    String
+  recordId  String?
+  oldValues Json?
+  newValues Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  tokenIndex  String   @unique
+  userId      String
+  tenantId    String
+  expiresAt   DateTime
+  isRevoked   Boolean  @default(false)
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([tokenIndex])
+  @@index([userId])
+}
+
+model CompanySettings {
+  id                 String   @id @default(uuid())
+  tenantId           String   @unique
+  tenant             Tenant   @relation(fields: [tenantId], references: [id])
+  companyName        String
+  logoUrl            String?
+  website            String?
+  vatNumber          String?
+  taxId              String?
+  registrationNumber String?
+  phone              String?
+  email              String?
+  street             String?
+  city               String?
+  state              String?
+  postalCode         String?
+  country            String   @default("US")
+  defaultCurrency    String   @default("USD")
+  iban               String?
+  bankName           String?
+  swiftBic           String?
+  defaultLanguage    String   @default("en")
+  timezone           String   @default("UTC")
+  dateFormat         String   @default("DD/MM/YYYY")
+  defaultVatRate     Float    @default(20.0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model UserInvitation {
+  id          String      @id @default(uuid())
+  tenantId           String?
+  tenant             Tenant?          @relation(fields: [tenantId], references: [id])
+  email       String
+  role        UserRole
+  departmentId String?
+  department  Department? @relation(fields: [departmentId], references: [id])
+  token       String      @unique @default(uuid())
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  isRevoked   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  @@unique([tenantId, email])
+  @@index([token])
+  @@index([tenantId])
+}
+
+enum ProjectStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum SiteStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  DISABLED
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  ENDED
+  CANCELLED
+}
+
+enum AttendanceStatus {
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  OVERDUE
+  CANCELLED
+}
+
+enum BoqUnit {
+  m
+  m2
+  m3
+  kg
+  T
+  Nos
+  LS
+  hr
+  day
+  month
+  set
+  roll
+  lot
+}
+
+enum IpcStatus {
+  DRAFT
+  SUBMITTED
+  CERTIFIED
+  PAID
+  REJECTED
+}
+
+enum VariationOrderStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model WorkerAssignment {
+  id          String            @id @default(uuid())
+  tenantId    String
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  siteId      String
+  site        Site              @relation(fields: [siteId], references: [id])
+  userId      String
+  user        User              @relation("AssignmentEmployee", fields: [userId], references: [id])
+  trade       String?           // e.g. Electrician, Mason, Carpenter, Laborer
+  startDate   DateTime
+  endDate     DateTime?         // null = ongoing
+  status      AssignmentStatus  @default(ACTIVE)
+  notes       String?
+  assignedById String
+  assignedBy  User              @relation("AssignmentCreatedBy", fields: [assignedById], references: [id])
+  endedById   String?
+  endedBy     User?             @relation("AssignmentEndedBy", fields: [endedById], references: [id])
+  endedAt     DateTime?
+  isDeleted   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, siteId])
+  @@index([tenantId, userId])
+  @@index([tenantId, userId, status])
+}
+
+model ProjectCategory {
+  id        String    @id @default(uuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  name      String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  projects  Project[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Project {
+  id               String           @id @default(uuid())
+  tenantId         String
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+  name             String
+  code             String
+  startDate        DateTime
+  deadline         DateTime?
+  categoryId       String?
+  category         ProjectCategory? @relation(fields: [categoryId], references: [id])
+  clientId         String?
+  client           Client?          @relation(fields: [clientId], references: [id])
+  summary          String?          @db.Text
+  projectManagerId String
+  projectManager   User             @relation("ProjectManager", fields: [projectManagerId], references: [id])
+  status           ProjectStatus    @default(DRAFT)
+  createdById      String
+  createdBy        User             @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  isDeleted        Boolean          @default(false)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  sites       Site[]
+  attachments ProjectAttachment[]
+  milestones  ProjectMilestone[]
+  clientExpenses ClientExpense[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([clientId])
+}
+
+model ProjectAttachment {
+  id           String   @id @default(uuid())
+  tenantId     String
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id])
+  fileName     String
+  fileUrl      String
+  fileSize     Int
+  mimeType     String
+  description  String?
+  uploadedById String
+  uploadedBy   User     @relation("UploadedProjectAttachments", fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([projectId])
+}
+
+model ProjectMilestone {
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  projectId    String
+  project      Project  @relation(fields: [projectId], references: [id])
+  title        String
+  description  String?  @db.Text
+  dueDate      DateTime
+  completedAt  DateTime?
+  status       MilestoneStatus @default(PENDING)
+  sortOrder    Int      @default(0)
+  createdById  String
+  createdBy    User     @relation("CreatedMilestone", fields: [createdById], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([projectId])
+  @@index([dueDate])
+}
+
+model Site {
+  id                String      @id @default(uuid())
+  tenantId          String
+  tenant            Tenant      @relation(fields: [tenantId], references: [id])
+  projectId         String
+  project           Project     @relation(fields: [projectId], references: [id])
+  code              String
+  name              String
+  locationAddress   String?
+  latitude          Float?
+  longitude         Float?
+  locationRadius    Int         @default(100)
+  creationDate      DateTime    @default(now())
+  plannedEndDate    DateTime?
+  actualEndDate     DateTime?
+  siteManagerId     String
+  siteManager       User        @relation("SiteManager", fields: [siteManagerId], references: [id])
+  status            SiteStatus  @default(DRAFT)
+  notes             String?     @db.Text
+  currencyCode      String      @default("USD")
+  retentionPercentage Float     @default(10.0)
+  advanceRecoveryAmount Decimal @default(0) @db.Decimal(15, 2)
+  qrCodeToken       String      @unique @default(uuid())
+  qrCodeGeneratedAt DateTime    @default(now())
+  isDeleted         Boolean     @default(false)
+  createdById       String
+  createdBy         User        @relation("SiteCreatedBy", fields: [createdById], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  locations   SiteLocation[]
+  assignments WorkerAssignment[]
+  attendance  Attendance[]
+  boqSections BoqSection[]
+  boqItems    BoQItem[]
+  mbEntries   MeasurementBookEntry[]
+  ipcRecords  IpcRecord[]
+  variationOrders   VariationOrder[]
+  attachments SiteAttachment[]
+  dailyReports DailyProgressReport[]
+  photos      SitePhoto[]
+
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([projectId])
+  @@index([qrCodeToken])
+}
+
+model Attendance {
+  id                    String           @id @default(uuid())
+  tenantId              String
+  tenant                Tenant           @relation(fields: [tenantId], references: [id])
+  siteId                String
+  site                  Site             @relation(fields: [siteId], references: [id])
+  employeeId            String
+  employee              User             @relation("AttendanceEmployee", fields: [employeeId], references: [id])
+  attendanceDate        DateTime         @db.Date
+  checkInTime           DateTime         @default(now())
+  checkInLat            Float
+  checkInLng            Float
+  checkInLocationValid  Boolean
+  checkOutTime          DateTime?
+  checkOutLat           Float?
+  checkOutLng           Float?
+  checkOutLocationValid Boolean?
+  status                AttendanceStatus @default(CHECKED_IN)
+  notes                 String?          @db.Text
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  @@unique([tenantId, siteId, employeeId, attendanceDate])
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([employeeId])
+  @@index([tenantId, attendanceDate])
+  @@index([attendanceDate])
+}
+
+model SiteLocation {
+  id        String         @id @default(uuid())
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id])
+  siteId    String
+  site      Site           @relation(fields: [siteId], references: [id])
+  parentId  String?
+  parent    SiteLocation?  @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children  SiteLocation[] @relation("LocationHierarchy")
+  photos    SitePhoto[]
+  name      String
+  levelType String
+  sortOrder Int            @default(0)
+  isDeleted Boolean        @default(false)
+  createdAt DateTime       @default(now())
+
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([parentId])
+}
+
+model SiteAttachment {
+  id           String   @id @default(uuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  siteId       String
+  site         Site     @relation(fields: [siteId], references: [id])
+  fileName     String
+  fileUrl      String
+  fileSize     Int
+  mimeType     String
+  description  String?
+  uploadedById String
+  uploadedBy   User     @relation("UploadedSiteAttachments", fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([siteId])
+}
+
+model DailyProgressReport {
+  id             String   @id @default(uuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  siteId         String
+  site           Site     @relation(fields: [siteId], references: [id])
+  reportDate     DateTime @db.Date
+  title          String
+  narrative      String   @db.Text
+  weather        String?
+  temperature    String?
+  workersOnSite  Int      @default(0)
+  equipmentOnSite String?
+  workCompleted  String   @db.Text
+  workPlanned    String   @db.Text
+  issuesRisks    String?  @db.Text
+  photos         SitePhoto[]
+  createdById    String
+  createdBy      User     @relation("CreatedDPR", fields: [createdById], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([tenantId, siteId, reportDate])
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([reportDate])
+}
+
+model SitePhoto {
+  id             String   @id @default(uuid())
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+  siteId         String
+  site           Site     @relation(fields: [siteId], references: [id])
+  dprId          String?
+  dpr            DailyProgressReport? @relation(fields: [dprId], references: [id])
+  fileUrl        String
+  fileName       String
+  fileSize       Int
+  mimeType       String
+  caption        String?
+  description    String?
+  locationId     String?
+  location       SiteLocation? @relation(fields: [locationId], references: [id])
+  takenAt        DateTime @default(now())
+  uploadedById   String
+  uploadedBy     User     @relation("UploadedSitePhotos", fields: [uploadedById], references: [id])
+  createdAt      DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([dprId])
+  @@index([takenAt])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  message   String   @db.Text
+  linkUrl   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  code      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+  invitations UserInvitation[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model BoqSection {
+  id        String     @id @default(uuid())
+  tenantId  String
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  siteId    String
+  site      Site       @relation(fields: [siteId], references: [id])
+  code      String
+  name      String
+  sortOrder Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     BoQItem[]
+
+  @@unique([tenantId, siteId, code])
+  @@index([tenantId])
+  @@index([siteId])
+}
+
+model VariationOrder {
+  id            String                @id @default(uuid())
+  tenantId      String
+  tenant        Tenant                @relation(fields: [tenantId], references: [id])
+  siteId        String
+  site          Site                  @relation(fields: [siteId], references: [id])
+  voNumber      Int
+  title         String
+  description   String?               @db.Text
+  status        VariationOrderStatus  @default(DRAFT)
+  createdById   String
+  createdBy     User                  @relation(fields: [createdById], references: [id])
+  approvedById  String?
+  approvedBy    User?                 @relation("VoApprovedBy", fields: [approvedById], references: [id])
+  approvedAt    DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  boqItems      BoQItem[]
+  variationOrderItems VariationOrderItem[]
+
+  @@unique([tenantId, siteId, voNumber])
+  @@index([tenantId])
+  @@index([siteId])
+}
+
+model VariationOrderItem {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  variationOrderId String
+  variationOrder  VariationOrder @relation(fields: [variationOrderId], references: [id])
+  action          String   // ADD or MODIFY
+  boqItemId       String?  // null for ADD, set for MODIFY
+  boqItem         BoQItem? @relation(fields: [boqItemId], references: [id])
+  itemCode        String
+  description     String   @db.Text
+  unit            BoqUnit
+  estimatedQty    Decimal  @db.Decimal(15, 4)
+  unitRate        Decimal  @db.Decimal(15, 2)
+  totalAmount     Decimal  @db.Decimal(15, 2)
+  originalQty     Decimal? @db.Decimal(15, 4)
+  originalRate    Decimal? @db.Decimal(15, 2)
+  createdAt       DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([variationOrderId])
+}
+
+model BoQItem {
+  id              String      @id @default(uuid())
+  tenantId        String
+  tenant          Tenant      @relation(fields: [tenantId], references: [id])
+  siteId          String
+  site            Site        @relation(fields: [siteId], references: [id])
+  sectionId       String?
+  section         BoqSection? @relation(fields: [sectionId], references: [id])
+  itemCode        String
+  description     String      @db.Text
+  unit            BoqUnit
+  estimatedQty    Decimal     @db.Decimal(15, 4)
+  unitRate        Decimal     @db.Decimal(15, 2)
+  totalAmount     Decimal     @db.Decimal(15, 2)
+  isBaseline      Boolean     @default(false)
+  variationOrderId String?
+  variationOrder  VariationOrder? @relation(fields: [variationOrderId], references: [id])
+  sortOrder       Int         @default(0)
+  createdById     String
+  createdBy       User        @relation(fields: [createdById], references: [id])
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  mbEntries       MeasurementBookEntry[]
+  ipcLineItems    IpcLineItem[]
+  variationOrderItems VariationOrderItem[]
+
+  @@unique([tenantId, siteId, itemCode])
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([siteId, isBaseline])
+}
+
+model MeasurementBookEntry {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  siteId          String
+  site            Site     @relation(fields: [siteId], references: [id])
+  boqItemId       String
+  boqItem         BoQItem  @relation(fields: [boqItemId], references: [id])
+  entryDate       DateTime @db.Date
+  description     String   @db.Text
+  dim1            Decimal? @db.Decimal(15, 4)
+  dim2            Decimal? @db.Decimal(15, 4)
+  dim3            Decimal? @db.Decimal(15, 4)
+  totalQuantity   Decimal  @db.Decimal(15, 4)
+  enteredById     String
+  enteredBy       User     @relation(fields: [enteredById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([boqItemId])
+  @@index([siteId, entryDate])
+  @@index([boqItemId, entryDate])
+}
+
+model IpcRecord {
+  id                    String    @id @default(uuid())
+  tenantId              String
+  tenant                Tenant    @relation(fields: [tenantId], references: [id])
+  siteId                String
+  site                  Site      @relation(fields: [siteId], references: [id])
+  ipcNumber             Int
+  billingStartDate      DateTime  @db.Date
+  billingEndDate        DateTime  @db.Date
+  status                IpcStatus @default(DRAFT)
+  isFinal               Boolean   @default(false)
+  isMbLinked            Boolean   @default(false)
+  grossClaimed          Decimal   @default(0) @db.Decimal(15, 2)
+  retentionDeduction    Decimal   @default(0) @db.Decimal(15, 2)
+  advanceRecovery       Decimal   @default(0) @db.Decimal(15, 2)
+  netPayable            Decimal   @default(0) @db.Decimal(15, 2)
+  certifiedGross        Decimal?  @db.Decimal(15, 2)
+  certifiedRetention    Decimal?  @db.Decimal(15, 2)
+  certifiedAdvanceRecovery Decimal? @db.Decimal(15, 2)
+  certifiedNetPayable   Decimal?  @db.Decimal(15, 2)
+  retentionReleased     Boolean   @default(false)
+  retentionReleasedAt   DateTime?
+  submittedAt           DateTime?
+  certifiedAt           DateTime?
+  paidAt                DateTime?
+  rejectedAt            DateTime?
+  rejectedById          String?
+  rejectedBy            User?     @relation("IpcRejectedBy", fields: [rejectedById], references: [id])
+  rejectionReason       String?   @db.Text
+  createdById           String
+  createdBy             User      @relation(fields: [createdById], references: [id])
+  certifiedById         String?
+  certifiedBy           User?     @relation("IpcCertifiedBy", fields: [certifiedById], references: [id])
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  lineItems             IpcLineItem[]
+  paymentRecords        IpcPaymentRecord[]
+
+  @@unique([tenantId, siteId, ipcNumber])
+  @@index([tenantId])
+  @@index([siteId])
+  @@index([siteId, status])
+}
+
+model IpcLineItem {
+  id                  String   @id @default(uuid())
+  tenantId            String
+  tenant              Tenant   @relation(fields: [tenantId], references: [id])
+  ipcRecordId         String
+  ipcRecord           IpcRecord @relation(fields: [ipcRecordId], references: [id])
+  boqItemId           String
+  boqItem             BoQItem  @relation(fields: [boqItemId], references: [id])
+  boqUnitRate         Decimal  @db.Decimal(15, 2)
+  boqQuantity         Decimal  @db.Decimal(15, 4)
+  previousQuantity    Decimal  @default(0) @db.Decimal(15, 4)
+  previousAmount      Decimal  @default(0) @db.Decimal(15, 2)
+  currentQuantity     Decimal  @default(0) @db.Decimal(15, 4)
+  currentPercent      Decimal  @default(0) @db.Decimal(8, 4)
+  currentAmount       Decimal  @default(0) @db.Decimal(15, 2)
+  cumulativeQuantity  Decimal  @default(0) @db.Decimal(15, 4)
+  cumulativeAmount    Decimal  @default(0) @db.Decimal(15, 2)
+  certifiedQuantity   Decimal? @db.Decimal(15, 4)
+  certifiedAmount     Decimal? @db.Decimal(15, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([ipcRecordId, boqItemId])
+  @@index([tenantId])
+  @@index([ipcRecordId])
+  @@index([boqItemId])
+}
+
+model IpcPaymentRecord {
+  id              String    @id @default(uuid())
+  tenantId        String
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  ipcRecordId     String
+  ipcRecord       IpcRecord @relation(fields: [ipcRecordId], references: [id])
+  amount          Decimal   @db.Decimal(15, 2)
+  paymentDate     DateTime  @db.Date
+  paymentMethod   String?
+  referenceNumber String?
+  notes           String?   @db.Text
+  recordedById    String
+  recordedBy      User      @relation(fields: [recordedById], references: [id])
+  createdAt       DateTime  @default(now())
+
+  @@index([tenantId])
+  @@index([ipcRecordId])
+}

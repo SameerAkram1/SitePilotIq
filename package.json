@@ -1,0 +1,10 @@
+{
+  "name": "sitepilotiq",
+  "private": true,
+  "workspaces": ["frontend", "backend", "mobile"],
+  "scripts": {
+    "frontend": "npm run dev --workspace=frontend",
+    "backend": "npm run start:dev --workspace=backend",
+    "mobile": "npm run start --workspace=mobile"
+  }
+}

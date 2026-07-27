@@ -1,0 +1,9 @@
+export { CreateClientDto } from './create-client.dto';
+export { UpdateClientDto } from './update-client.dto';
+export { QueryClientsDto } from './query-clients.dto';
+export { CreateContactDto } from './create-contact.dto';
+export { UpdateContactDto } from './update-contact.dto';
+export { CreateClientNoteDto } from './create-note.dto';
+export { UpdateClientNoteDto } from './update-note.dto';
+export { CreateBudgetDto } from './create-budget.dto';
+export { CreateExpenseDto } from './create-expense.dto';
