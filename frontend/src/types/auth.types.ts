@@ -6,6 +6,7 @@ export interface AuthUser {
   isFirstLogin?: boolean;
   onboardingComplete?: boolean;
   tenantId?: string;
+  tokenExpiresAt?: number;
 }
 
 export interface LoginPayload {
