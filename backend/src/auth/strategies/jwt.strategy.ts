@@ -13,9 +13,16 @@ interface JwtPayload {
   role: string;
 }
 
-function extractJwtFromCookie(req: Request): string | null {
+function extractJwtFromRequest(req: Request): string | null {
+  // Try cookie first, then Authorization header
   const token = req.cookies?.accessToken;
-  return token || null;
+  if (token) return token;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  return null;
 }
 
 @Injectable()
@@ -31,7 +38,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
-      jwtFromRequest: extractJwtFromCookie,
+      jwtFromRequest: extractJwtFromRequest,
       ignoreExpiration: false,
       secretOrKey: jwtAccessSecret,
     });
