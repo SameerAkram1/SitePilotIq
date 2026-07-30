@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/landing',
-        destination: '/landing/index.html',
+        source: '/',
+        destination: '/index.html',
       },
     ];
   },
