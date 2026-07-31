@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 import { I18nService } from '../i18n/i18n.service';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private readonly resend: Resend;
+  private readonly transporter: nodemailer.Transporter;
   private readonly frontendUrl: string;
   private readonly fromEmail: string;
 
@@ -15,8 +15,17 @@ export class EmailService {
     private readonly i18n: I18nService,
   ) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-    this.fromEmail = this.configService.get<string>('EMAIL_FROM') || 'SitePilotIQ <onboarding@resend.dev>';
-    this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
+    this.fromEmail = this.configService.get<string>('EMAIL_FROM') || 'SitePilotIQ <r7w6fgxjqupoqppz@ethereal.email>';
+
+    this.transporter = nodemailer.createTransport({
+      host: this.configService.get<string>('SMTP_HOST') || 'smtp.ethereal.email',
+      port: parseInt(this.configService.get<string>('SMTP_PORT') || '587'),
+      secure: false,
+      auth: {
+        user: this.configService.get<string>('SMTP_USER') || 'r7w6fgxjqupoqppz@ethereal.email',
+        pass: this.configService.get<string>('SMTP_PASS') || 'MpkZ9AdpD2zxMbJPAX',
+      },
+    });
   }
 
   async sendVerificationEmail(to: string, fullName: string, token: string, locale?: string): Promise<void> {
@@ -96,7 +105,7 @@ export class EmailService {
 
   private async sendEmail(options: { to: string; subject: string; html: string; text: string }): Promise<void> {
     try {
-      await this.resend.emails.send({
+      await this.transporter.sendMail({
         from: this.fromEmail,
         to: options.to,
         subject: options.subject,
