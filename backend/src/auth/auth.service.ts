@@ -161,7 +161,7 @@ export class AuthService {
       return { tenantId: tenant.id, userId: user.id };
     });
 
-    // Send verification email (outside transaction — non-critical)
+    // Send verification email
     await this.emailService.sendVerificationEmail(dto.email, dto.fullName, emailVerifyToken);
 
     return { message: 'Check your email to verify your account' };
