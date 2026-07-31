@@ -15,15 +15,15 @@ export class EmailService {
     private readonly i18n: I18nService,
   ) {
     this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
-    this.fromEmail = this.configService.get<string>('EMAIL_FROM') || 'SitePilotIQ <r7w6fgxjqupoqppz@ethereal.email>';
+    this.fromEmail = this.configService.get<string>('EMAIL_FROM') || `SitePilotIQ <${this.configService.get<string>('SMTP_USER')}>`;
 
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('SMTP_HOST') || 'smtp.ethereal.email',
+      host: this.configService.get<string>('SMTP_HOST') || 'smtp.gmail.com',
       port: parseInt(this.configService.get<string>('SMTP_PORT') || '587'),
       secure: false,
       auth: {
-        user: this.configService.get<string>('SMTP_USER') || 'r7w6fgxjqupoqppz@ethereal.email',
-        pass: this.configService.get<string>('SMTP_PASS') || 'MpkZ9AdpD2zxMbJPAX',
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASS'),
       },
     });
   }
